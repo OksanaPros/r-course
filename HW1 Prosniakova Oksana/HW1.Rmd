@@ -1,0 +1,65 @@
+---
+title: "Homework 1"
+author: "Oksana Prosniakova"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+
+
+## Monte Carlo method
+
+We aim to find the area of the figure bounded by these curves:
+
+$y = 2|x| - \pi;\ \ x \in [-\frac{\pi}{2}, \frac{\pi}{2}]$
+<br><br>
+$y = |sin(2x)|;\ \ x \in [-\frac{\pi}{2}, \frac{\pi}{2}]$
+
+
+It can be done using Monte Carlo method. 
+
+From the equations (or a picture) we know that $x_{min} = -\frac{\pi}{2}, \ x_{max} = \frac{\pi}{2}, \ y_{min} = -\pi, \ y_{max} = 1$
+
+The algorithm is the following:
+
+1) Generate a dot with random (x, y) coordinates within the $[x_{min}; x_{max}]\times[y_{min}; y_{max}]$ rectangle;
+
+2) Check whether or not these coordinates are within the given figure;
+
+3) Count the number of dots (k) than pass this criteria;
+
+4) Repeat N times
+
+5) Calculate the area of the figure using this formula:
+
+$S = \frac{k}{N}S_0$
+
+where $S_0$ is the area of the $[x_{min}; x_{max}]\times[y_{min}; y_{max}]$ rectangle
+ 
+```{r}
+N <- 100000
+k <- 0
+
+for (i in 1:N) {
+  x <- runif(1, min = -pi/2, max = pi/2)
+  y <- runif(1, min = -pi, max = 1)
+  if (y >= 2*abs(x) - pi && y <= abs(sin(2*x))){
+    k <- k + 1
+  }
+}
+
+cat('k =', k)
+```
+
+```{r}
+S_0 <- pi*(1+pi)
+S <- k/N*S_0
+```
+```{r}
+cat('Area of the rectangle: S_0 = ', S_0)
+```
+```{r}
+cat('Area of the figure S = ', S)
+```
+
+
