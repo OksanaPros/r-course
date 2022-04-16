@@ -1,0 +1,121 @@
+---
+title: "Homework 2"
+author: "Oksana Prosniakova"
+date: "16 04 2022"
+output: pdf_document
+---
+
+## Black Jack probabilities
+
+```{r}
+deck <- read.csv("deck.txt")
+head(deck)
+```
+
+### Casino has 4 decks:
+
+```{r}
+deck <- as.data.frame(lapply(deck, rep, 4))
+```
+
+### Shuffle
+
+```{r}
+shuffle_deck <- function(cards) { 
+  n = nrow(cards)
+  random <- sample(1:n, size = n)
+  cards[random, ]
+}
+```
+
+### Start of the game
+
+#### Also, how do I print the data frame without column names? I tried googling, but failed to find the answer
+
+```{r}
+start_game <- function(cards) {
+  curr_deck <<- shuffle_deck(cards)
+  dealer <<- curr_deck[1:2,]
+  curr_deck <<- curr_deck[-(1:2),]
+  player <<- curr_deck[1:2,]
+  curr_deck <<- curr_deck[-(1:2),]
+  
+  stats <<- function() {
+    cat("Dealer's hand:", fill = T)
+  
+    print(dealer, row.names = F)
+  
+    cat("sum", sum(dealer$value), fill = T)
+  
+    cat("Player's hand:", fill = T)
+  
+    print(player, row.names = F)
+  
+    cat("sum", sum(player$value), fill = T)
+    
+    if (sum(dealer$value) <= sum(player$value) && sum(player$value) < 21) {
+      cat("chances 100%")
+      } else if (sum(player$value) > 21) {
+      cat("chances 0%")
+      } else {
+      A = 21 - sum(player$value)
+      B = sum(dealer$value) - sum(player$value)
+      
+      good_cards <- sum(curr_deck$value >= B & curr_deck$value <= A)
+      cat("chances", good_cards/nrow(curr_deck)*100, "%")
+    }
+    } 
+  
+  stats()
+}
+```
+
+### Deal
+
+```{r}
+deal <- function() {
+  player[nrow(player)+1, ] <<- shuffle_deck(curr_deck)[1, ]
+  curr_deck <<- curr_deck[-1,]
+  stats()
+}
+```
+
+### End of the game
+
+```{r}
+stop_game <- function() {
+  if (sum(dealer$value) <= sum(player$value) && sum(player$value) < 21) {
+    print("You won")
+  }
+  else {
+    print("You lost")
+  }
+}
+```
+
+
+### Game 1
+
+```{r}
+start_game(deck)
+```
+
+```{r}
+deal()
+```
+
+```{r}
+stop_game()
+```
+
+### Game 2
+
+```{r}
+start_game(deck)
+```
+
+```{r}
+stop_game()
+```
+
+
