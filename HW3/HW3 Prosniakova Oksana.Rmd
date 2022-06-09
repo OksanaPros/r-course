@@ -1,0 +1,86 @@
+---
+title: "Homework 3"
+author: "Oksana Prosniakova"
+output:
+  html_document:
+    df_print: paged
+---
+```{r}
+zanu <- read.csv("ZANU_genes.tsv", sep = '\t', header = T)
+dongola <- read.csv("DONGOLA_genes.tsv", sep = '\t', header = T)
+mapping <- read.csv("gene_mapping.tsv", sep = '\t', header = T)
+```
+
+```{r}
+require(RIdeogram)
+```
+
+```{r}
+karyotype <- data.frame(Chr = c("X", "2", "3", "X", "2", "3"),
+                        Start = rep(1, times=6),
+                        End = c(27238055, 114783175, 97973315, 26913133, 111988354, 95710210),
+                        fill = rep("969696", times=6),
+                        species = c(rep("Zanu", times=3), rep("Dongola", times=3)),
+                        size = rep(12, times=6),
+                        color = rep(252525, times=6))
+```
+
+```{r}
+tmp <- mapping$DONG
+DONG <- read.table(text = tmp, sep = ",")
+colnames(DONG) <- c("chr_DONG", "middle.pos_DONG", "strand_DONG", "length_DONG", "name_DONG")
+head(DONG)
+```
+
+```{r}
+DONG$chr_DONG[DONG$chr_DONG == "NC_053517.1"] <- 2
+DONG$chr_DONG[DONG$chr_DONG == "NC_053518.1"] <- 3
+DONG$chr_DONG[DONG$chr_DONG == "NC_053519.1"] <- 1
+```
+
+```{r}
+colnames(zanu)[1] <- "name"
+```
+
+```{r}
+mapping <- cbind(mapping, DONG)
+mapping <- merge(mapping, zanu, by = "name")
+
+colnames(mapping)[colnames(mapping) == "start"] <- "start_zanu"
+colnames(mapping)[colnames(mapping) == "end"] <- "end_zanu"
+mapping$name_DONG_true <- gsub("DONG_(.)", "\\1", mapping$name_DONG)
+```
+
+```{r}
+colnames(dongola)[1] <- "name_DONG_true"
+mapping <- merge(mapping, dongola, by = "name_DONG_true")
+```
+
+```{r}
+mapping$contig <- ifelse(mapping$contig == "X", 1, as.integer(mapping$contig))
+mapping$chr_DONG <- as.integer(mapping$chr_DONG)
+```
+
+
+```{r}
+fill <- ifelse(mapping$strand.x == mapping$strand_DONG, '00BFC4', 'F8766D')
+```
+
+```{r}
+synteny <- data.frame(Species_1 = mapping$contig, 
+                 Start_1 = mapping$start_zanu, 
+                 End_1 = mapping$end_zanu, 
+                 Species_2 = mapping$chr_DONG, 
+                 Start_2 = mapping$start, 
+                 End_2 = mapping$end, 
+                 fill = fill)
+
+synteny$Species_1 <- as.integer(synteny$Species_1)
+synteny <- na.omit(synteny)
+```
+
+```{r}
+ideogram(karyotype = karyotype, synteny = synteny)
+convertSVG("chromosome.svg", device = "png")
+```
+
